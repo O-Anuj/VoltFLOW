@@ -5,9 +5,9 @@ import { X, Download, ExternalLink, Loader2, FileText, Image as ImageIcon } from
 interface FilePreviewModalProps {
   file: {
     name: string;
-    type: string;
-    mimeType: string;
-    downloadURL: string;
+    type?: string;
+    mimeType?: string;
+    downloadURL?: string;
   } | null;
   onClose: () => void;
 }
@@ -23,12 +23,14 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ file, onClose }) =>
 
   if (!file) return null;
 
-  const isImage = file.type === 'image' || file.mimeType.startsWith('image/');
+  const isImage = file.type === 'image' || (file.mimeType && file.mimeType.startsWith('image/'));
   const isPDF = file.type === 'pdf' || file.mimeType === 'application/pdf';
 
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(file.downloadURL, '_blank');
+    if (file.downloadURL) {
+      window.open(file.downloadURL, '_blank');
+    }
   };
 
   return (
@@ -85,7 +87,7 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ file, onClose }) =>
               </div>
             )}
 
-            {isImage && (
+            {isImage && file.downloadURL && (
               <img 
                 src={file.downloadURL} 
                 alt={file.name}
@@ -94,7 +96,7 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ file, onClose }) =>
               />
             )}
 
-            {isPDF && (
+            {isPDF && file.downloadURL && (
               <iframe 
                 src={`${file.downloadURL}#toolbar=0`}
                 title={file.name}

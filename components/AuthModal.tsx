@@ -17,11 +17,13 @@ import { getFirebaseErrorMessage } from '../lib/firebaseUtils';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialMode?: 'default' | 'forgot-password' | 'reset-sent' | 'verification-pending';
+  initialTab?: 'signin' | 'signup';
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
-  const [mode, setMode] = useState<'default' | 'forgot-password' | 'reset-sent' | 'verification-pending'>('default');
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'default', initialTab = 'signin' }) => {
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>(initialTab);
+  const [mode, setMode] = useState<'default' | 'forgot-password' | 'reset-sent' | 'verification-pending'>(initialMode);
   
   // Form State
   const [email, setEmail] = useState('');
@@ -40,10 +42,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       setEmail('');
       setPassword('');
       setFullName('');
-      setMode('default');
-      setActiveTab('signin');
+      setMode(initialMode);
+      setActiveTab(initialTab);
     }
-  }, [isOpen]);
+  }, [isOpen, initialMode, initialTab]);
 
   // Clear errors when switching tabs
   useEffect(() => {

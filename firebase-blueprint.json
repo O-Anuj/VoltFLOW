@@ -1,0 +1,89 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "plan": { "type": "string", "enum": ["Free", "Pro", "Enterprise"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "createdAt"]
+    },
+    "Folder": {
+      "title": "Folder",
+      "description": "A folder for organizing files",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "parentId": { "type": "string", "description": "Optional parent folder ID" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "createdAt"]
+    },
+    "File": {
+      "title": "File",
+      "description": "Metadata for a file",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "folderId": { "type": "string", "description": "Optional folder ID" },
+        "size": { "type": "number" },
+        "type": { "type": "string", "enum": ["image", "pdf", "doc"] },
+        "mimeType": { "type": "string" },
+        "storagePath": { "type": "string" },
+        "downloadURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "size", "storagePath", "downloadURL", "createdAt"]
+    },
+    "Note": {
+      "title": "Note",
+      "description": "A simple text note",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "color": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "createdAt"]
+    },
+    "TeamMember": {
+      "title": "TeamMember",
+      "description": "A member of the user's team",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users/{uid}": {
+      "schema": "User",
+      "description": "User profile document"
+    },
+    "users/{uid}/folders/{folderId}": {
+      "schema": "Folder",
+      "description": "Folders created by the user"
+    },
+    "users/{uid}/files/{fileId}": {
+      "schema": "File",
+      "description": "Files metadata created by the user"
+    },
+    "users/{uid}/notes/{noteId}": {
+      "schema": "Note",
+      "description": "Notes created by the user"
+    },
+    "users/{uid}/teamMembers/{memberId}": {
+      "schema": "TeamMember",
+      "description": "Team members added by the user"
+    }
+  }
+}

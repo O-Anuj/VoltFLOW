@@ -9,6 +9,7 @@ import PricingPreview from './components/PricingPreview';
 import FinalCTA from './components/FinalCTA';
 import BackgroundEffects from './components/ui/BackgroundEffects';
 import AuthModal from './components/AuthModal';
+import ErrorBoundary from './components/ErrorBoundary';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
 // Auth
@@ -28,6 +29,7 @@ const App: React.FC = () => {
   
   const [currentPath, setCurrentPath] = useState(getHashPath());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'default' | 'verification-pending'>('default');
   
   const { user, loading } = useAuth();
 
@@ -47,16 +49,23 @@ const App: React.FC = () => {
     window.location.hash = path;
   };
 
-  const openAuthModal = () => {
+  const openAuthModal = (mode: 'default' | 'verification-pending' = 'default') => {
+    setAuthModalMode(mode);
     setIsAuthModalOpen(true);
   };
 
   // Protect Dashboard Route
   useEffect(() => {
-    if (!loading && currentPath === '/dashboard' && !user) {
-      // If user tries to access dashboard but not logged in, redirect home and open auth modal
-      navigate('/');
-      setIsAuthModalOpen(true);
+    if (!loading && currentPath === '/dashboard') {
+      if (!user) {
+        // If user tries to access dashboard but not logged in, redirect home and open auth modal
+        navigate('/');
+        openAuthModal('default');
+      } else if (!user.emailVerified) {
+        // If user is logged in but not verified, redirect home and open auth modal
+        navigate('/');
+        openAuthModal('verification-pending');
+      }
     }
   }, [loading, currentPath, user]);
 
@@ -100,9 +109,11 @@ const App: React.FC = () => {
       <BackgroundEffects />
       
       <div className="relative z-10">
-        <Navbar onNavigate={navigate} onOpenAuth={openAuthModal} />
+        <Navbar onNavigate={navigate} onOpenAuth={() => openAuthModal('default')} />
         <main>
-          {renderContent()}
+          <ErrorBoundary>
+            {renderContent()}
+          </ErrorBoundary>
         </main>
       </div>
       
@@ -126,7 +137,7 @@ const App: React.FC = () => {
               </p>
               {!user && (
                 <button 
-                  onClick={openAuthModal}
+                  onClick={() => openAuthModal('default')}
                   className="px-6 py-2.5 rounded-full bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500 transition-all shadow-[0_4px_12px_rgba(16,185,129,0.2)] hover:shadow-[0_4px_20px_rgba(16,185,129,0.3)] flex items-center gap-2 group whitespace-nowrap"
                 >
                   Get Started
@@ -144,7 +155,11 @@ const App: React.FC = () => {
         </footer>
       )}
 
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        initialMode={authModalMode}
+      />
     </div>
   );
 };

@@ -18,10 +18,10 @@ import { db, storage } from '../lib/firebase';
 interface FileVersion {
   id: string;
   name: string;
-  size: number;
-  type: string;
-  storagePath: string;
-  downloadURL: string;
+  size: string | number;
+  type?: string;
+  storagePath?: string;
+  downloadURL?: string;
   archivedAt: Timestamp;
 }
 
@@ -29,11 +29,11 @@ interface FileVersionModalProps {
   file: {
     id: string;
     name: string;
-    size: number;
-    type: string;
-    mimeType: string;
-    storagePath: string;
-    downloadURL: string;
+    size: string | number;
+    type?: string;
+    mimeType?: string;
+    storagePath?: string;
+    downloadURL?: string;
   } | null;
   userId: string;
   onClose: () => void;
@@ -149,8 +149,7 @@ const FileVersionModal: React.FC<FileVersionModalProps> = ({ file, userId, onClo
 
   const handleRestore = async (version: FileVersion) => {
     if (!file) return;
-    if (!window.confirm(`Are you sure you want to restore the version from ${formatDate(version.archivedAt)}? The current file will be archived.`)) return;
-
+    // Removed window.confirm as per guidelines
     setIsUploading(true); // Reuse loading state
     
     try {
@@ -177,8 +176,10 @@ const FileVersionModal: React.FC<FileVersionModalProps> = ({ file, userId, onClo
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+  const formatFileSize = (size: string | number) => {
+    if (typeof size === 'string') return size;
+    const bytes = Number(size);
+    if (isNaN(bytes) || bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
